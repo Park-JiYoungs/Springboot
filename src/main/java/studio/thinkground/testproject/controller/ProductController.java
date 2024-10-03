@@ -3,9 +3,13 @@ package studio.thinkground.testproject.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import studio.thinkground.testproject.data.dto.ProductDto;
 import studio.thinkground.testproject.service.ProductService;
+
+import javax.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/product-api")
@@ -31,14 +35,21 @@ public class ProductController {
 
     // http://localhost:8080/api/v1/product-api/product
     @PostMapping(value = "/product")
-    public ProductDto createProduct(@RequestBody ProductDto productDto) {
+    public ResponseEntity<ProductDto> createProduct(@Valid @RequestBody ProductDto productDto) {
 
         String productId = productDto.getProductId();
         String productName = productDto.getProductName();
         int productPrice = productDto.getProductPrice();
         int productStock = productDto.getProductStock();
 
-        return productService.saveProduct(productId,productName,productPrice,productStock);
+        ProductDto response = productService
+                .saveProduct(productId, productName, productPrice, productStock);
+
+        LOGGER.info(
+                "[createProduct] Response >> productId: {}, productName: {}, productPrice: {}, productStock: {}",
+                response.getProductId(), response.getProductName(), response.getProductPrice(), response.getProductStock()
+        );
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(response);
     }
 
     // http://loclhost:8080/api/v1/product-api/product/{productId}
